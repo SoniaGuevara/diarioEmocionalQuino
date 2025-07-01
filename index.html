@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario Emocional Escolar E-Quino</title>
+    <style>
+        /* --- ESTILOS GENERALES Y FUENTES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Patrick Hand', cursive;
+            background-color: #f0f8ff; /* Un azul cielo muy claro */
+            margin: 0;
+            padding: 1rem 0; /* Añadimos padding vertical para que no se pegue en mobile */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(16, 160, 185, 0.347);
+            position: relative;
+            padding: 40px;
+            padding-bottom: 155px; /* Espacio para el footer de nubes */
+            overflow: hidden; /* Para que las nubes no se salgan */
+        }
+
+        /* --- IMÁGENES DE DECORACIÓN --- */
+        .pencil-decoration {
+            position: absolute;
+            top: 20px;
+            left: 50px;
+            width: 80px;
+            transform: rotate(-30deg);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            position: absolute;
+            top: 0px;
+            left: 150px;
+            width: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        /* --- TÍTULO PRINCIPAL --- */
+        .main-title {
+            background-color: #ffcce7; /* Rosa pálido */
+            color: #583c5a;
+            padding: 10px 25px;
+            display: inline-block;
+            font-size: 1.8em;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            border-radius: 5px;
+            clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%);
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- FORMULARIO Y CONTENIDO CENTRAL --- */
+        .content {
+            margin-top: 120px; /* Espacio para el header */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 20px 40px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .central-image {
+            grid-column: 1 / -1; /* Ocupa ambas columnas */
+            grid-row: 2;
+            justify-self: center;
+            width: 150px;
+            margin: 0;
+        }
+
+        /* --- ESTILOS DE LOS INPUTS Y LABELS --- */
+        .form-group {
+            font-size: 1.5em;
+        }
+        
+        .form-group.curso { grid-column: 1; grid-row: 1; justify-self: end; text-align: right; margin-right: 20px;}
+        .form-group.materia { grid-column: 1; grid-row: 3; justify-self: end; text-align: right; margin-right: 20px;}
+        .form-group.sentimiento { grid-column: 2; grid-row: 1; justify-self: start; text-align: left; margin-left: 20px;}
+        .form-group.causa { grid-column: 2; grid-row: 3; justify-self: start; text-align: left; margin-left: 20px;}
+        .form-group.explicacion { grid-column: 1 / -1; grid-row: 4; justify-self: center; text-align: center; width: 100%;}
+        .form-group.submit-group { grid-column: 1 / -1; grid-row: 5; justify-self: center; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.8em;
+            transition: border-color 0.3s;
+        }
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #ffcce7;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        /* --- BOTÓN DE ENVIAR --- */
+        .submit-btn {
+            background: #ff620034;
+            border: 2px solid #87CEEB; /* Azul cielo */
+            border-radius: 15px;
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(135, 206, 235, 0.5);
+        }
+        .submit-btn img {
+            width: 60px;
+            height: auto;
+            display: block;
+        }
+
+        /* --- FOOTER DE NUBES --- */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 155px; /* Altura de la imagen de nubes */
+            background-image: url('img/cielo1.png'); /* ¡IMPORTANTE! Poner la imagen de nubes aquí */
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center bottom;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            color: #005a8d;
+        }
+
+        .footer-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            height: 100%;
+            padding: 0 40px 15px 40px;
+            box-sizing: border-box;
+        }
+
+        .footer-logo img {
+            height: 70px;
+            width: auto;
+        }
+
+        .footer-names-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #005a8d;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .footer-names-container span {
+            white-space: nowrap;
+        }
+
+        /* --- MENSAJE DE ESTADO --- */
+        #status-message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            height: 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+
+
+        /*
+        ==============================================
+        --- REGLAS PARA DISEÑO ADAPTABLE (RESPONSIVE) ---
+        ==============================================
+        Estos estilos se aplicarán solo en pantallas con un ancho máximo de 768px (tablets y móviles).
+        */
+        @media (max-width: 768px) {
+            body {
+                align-items: flex-start; /* Alinea el contenedor arriba en mobile */
+            }
+
+            .container {
+                padding: 20px;
+                padding-bottom: 200px; /* Más espacio para el footer que ahora es más alto */
+            }
+
+            /* --- Ajustes del Header para mobile --- */
+            .pencil-decoration {
+                top: 10px;
+                left: 10px;
+                width: 50px; /* Más pequeño */
+            }
+
+            .logo {
+                top: 5px;
+                left: 50%; /* Lo centramos */
+                transform: translateX(-50%); /* Ajuste fino para centrar */
+                width: 140px; /* Más pequeño */
+            }
+
+            .main-title {
+                position: static; /* Dejamos que fluya con el contenido */
+                margin-top: 80px; /* Espacio para el logo */
+                margin-bottom: 20px;
+                font-size: 1.3em; /* Título más pequeño */
+                text-align: center;
+                clip-path: none; /* Quitamos la forma de banner para simplificar */
+                width: 100%;
+            }
+
+            /* --- Ajustes del Formulario para mobile --- */
+            .content {
+                margin-top: 0; /* Ya no necesita margen superior */
+                grid-template-columns: 1fr; /* ¡LA MAGIA! Una sola columna */
+                grid-template-rows: auto; /* Dejamos que las filas se creen solas */
+                gap: 15px; /* Menos espacio entre elementos */
+            }
+
+            /* Reseteamos la posición de cada elemento del grid */
+            .form-group.curso,
+            .form-group.materia,
+            .form-group.sentimiento,
+            .form-group.causa,
+            .form-group.explicacion,
+            .form-group.submit-group {
+                grid-column: auto;
+                grid-row: auto;
+                justify-self: center;
+                text-align: center;
+                margin: 0;
+                width: 100%;
+                max-width: 350px; /* Un ancho máximo para los inputs */
+            }
+
+            .central-image {
+                /* Lo movemos para que esté entre el sentimiento y la materia */
+                grid-row: 3;
+                margin: 10px 0;
+                width: 120px;
+            }
+
+            /* Reordenamos los elementos para que tengan más sentido en vertical */
+            .form-group.curso { grid-row: 1; }
+            .form-group.sentimiento { grid-row: 2; }
+            .form-group.materia { grid-row: 4; }
+            .form-group.causa { grid-row: 5; }
+            .form-group.explicacion { grid-row: 6; }
+            .form-group.submit-group { grid-row: 7; }
+
+            /* --- Ajustes del Footer para mobile --- */
+            .footer-content-wrapper {
+                flex-direction: column; /* Apila los elementos del footer */
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+                padding: 15px;
+                text-align: center;
+            }
+            .footer-logo {
+                margin: 0;
+            }
+            .footer-logo img {
+                height: 50px; /* Logos más pequeños */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Decoraciones -->
+        <img src="img/lapicero.webp" alt="Lápiz decorativo" class="pencil-decoration" onerror="this.style.display='none'">
+        <img src="img/logo.png" alt="Logo E-Quino" class="logo" onerror="this.style.display='none'">
+        <div class="main-title">Pulso Escolar - Diario Emocional</div>
+
+        <!-- Formulario -->
+        <form id="emotion-form" class="content">
+            
+            <div class="form-group curso">
+                <label for="curso-select">Curso</label>
+                <select id="curso-select" name="curso" required>
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+
+            <div class="form-group sentimiento">
+                <label for="sentimiento-select">¿Cómo te has sentido?</label>
+                <select id="sentimiento-select" name="sentimiento" required>
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+
+            <img src="img/mafalda.webp" alt="Imagen de Mafalda" class="central-image" onerror="this.style.display='none'">
+
+            <div class="form-group materia">
+                <label for="materia-select">Materia</label>
+                <select id="materia-select" name="materia" required>
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+
+            <div class="form-group causa">
+                <label for="causa-select">¿Por qué estás así?</label>
+                <select id="causa-select" name="causa" required>
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+            
+            <div class="form-group explicacion">
+                <label for="explicacion-text">¿Quieres explicar la situación?</label>
+                <textarea id="explicacion-text" name="explicacion" placeholder="(Opcional)"></textarea>
+            </div>
+
+            <div class="form-group submit-group">
+                <button type="submit" class="submit-btn">
+                    <img src="img/avion de papel.png" alt="Enviar" onerror="this.style.display='none'">
+                </button>
+            </div>
+        </form>
+
+        <div id="status-message"></div>
+
+        <footer class="footer">
+            <div class="footer-content-wrapper">
+                <div class="footer-logo left-logo">
+                    <img src="img/logo.png" alt="Quino Logo">
+                </div>
+
+                <div class="footer-names-container">
+                    <span>Candela Brizuela</span>
+                    <span>Nicole Gulian</span>
+                    <span>Bianca Gulian</span>
+                    <span>Lucas Ramírez</span>
+                    <span>Maxi Valdez</span>
+                    <span>Alex Soria</span>
+                    <span>Facundo Vila</span>
+                </div>
+
+                <div class="footer-logo right-logo">
+                    <img src="img/logoMzaFutura.png" alt=".com Logo">
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- LÓGICA DE JAVASCRIPT PARA CONECTAR CON EL BACKEND ---
+        
+        // ¡IMPORTANTE! Cuando subas esto a la nube, cambia esta URL.
+        const API_URL = 'http://localhost:5000'; 
+
+        // Función para poblar los menús <select> con opciones desde la API
+        function populateSelect(selectId, options) {
+            const selectElement = document.getElementById(selectId);
+            selectElement.innerHTML = '<option value="" disabled selected>Selecciona una opción</option>'; // Opción por defecto
+            if (options && Array.isArray(options)) {
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    selectElement.appendChild(optionElement);
+                });
+            }
+        }
+
+        // Se ejecuta cuando el contenido de la página se ha cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pedimos las opciones al backend
+            fetch(`${API_URL}/api/options`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    // Rellenamos cada menú con su lista de opciones
+                    populateSelect('curso-select', data.cursos);
+                    populateSelect('materia-select', data.materias);
+                    populateSelect('sentimiento-select', data.emociones);
+                    populateSelect('causa-select', data.causas);
+                })
+                .catch(error => {
+                    console.error('Error al cargar las opciones:', error);
+                    const statusMessage = document.getElementById('status-message');
+                    statusMessage.textContent = 'Error al conectar con el servidor. Inténtalo más tarde.';
+                    statusMessage.className = 'error';
+                });
+        });
+
+        // Manejo del envío del formulario
+        const form = document.getElementById('emotion-form');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Evitamos que la página se recargue
+
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.textContent = 'Enviando...';
+            statusMessage.className = '';
+
+            // Recogemos los datos del formulario
+            const formData = new FormData(form);
+            const data = {
+                curso: formData.get('curso'),
+                materia: formData.get('materia'),
+                sentimiento: formData.get('sentimiento'),
+                causa: formData.get('causa'),
+                explicacion: formData.get('explicacion')
+            };
+
+            console.log('Datos que se van a enviar:', JSON.stringify(data, null, 2));
+
+            // Enviamos los datos al backend usando fetch
+            fetch(`${API_URL}/api/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                console.log('Respuesta recibida del servidor:', response);
+                if (!response.ok) {
+                    throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Datos JSON recibidos del servidor:', result);
+                if (result.success) {
+                    statusMessage.textContent = '¡Gracias por compartir!';
+                    statusMessage.className = 'success';
+                    form.reset();
+                } else {
+                    statusMessage.textContent = `Error: ${result.message || 'Inténtalo de nuevo.'}`;
+                    statusMessage.className = 'error';
+                }
+                setTimeout(() => {
+                    statusMessage.textContent = '';
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Ha ocurrido un error en la comunicación:', error);
+                statusMessage.textContent = 'Error de conexión. Revisa la consola del backend y del navegador.';
+                statusMessage.className = 'error';
+            });
+        });
+    </script>
+
+</body>
+</html>
