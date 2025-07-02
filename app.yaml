@@ -1,0 +1,10 @@
+        runtime: python39 # Especifica la versión de Python. Python 3.9 es estable y compatible.
+        entrypoint: gunicorn -b :$PORT backend:app
+
+        instance_class: F1 # Tipo de instancia. F1 es la más pequeña y suele ser suficiente para el nivel gratuito.
+
+        handlers:
+        - url: /.*
+          script: auto
+          secure: always # Redirige todo el tráfico a HTTPS
+        
