@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import pandas as pd
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import gspread # Importamos la librería para interactuar con Google Sheets
+from oauth2client.service_account import ServiceAccountCredentials # Importamos para las credenciales
 
 # --- INICIALIZACIÓN DE LA APLICACIÓN FLASK ---
 app = Flask(__name__)
@@ -13,11 +14,11 @@ CORS(app)
 # Estas son las opciones que se enviarán al frontend.
 CURSOS_DISPONIBLES = ["1ro A", "1ro B", "2do A", "2do B", "3ro A", "4to A", "5to A", "6to A"]
 MATERIAS_DISPONIBLES = [
-    "Matemática", "Lengua y Literatura", "Historia", "Geografía", 
+    "Matemática", "Lengua y Literatura", "Historia", "Geografía",
     "Biología", "Física", "Química", "Educación Física", "Inglés", "Otra"
 ]
 EMOCIONES_DISPONIBLES = [
-    "Feliz", "Triste", "Enojado/a", "Ansioso/a", 
+    "Feliz", "Triste", "Enojado/a", "Ansioso/a",
     "Sorprendido/a", "Con miedo", "Con calma", "Agradecido/a"
 ]
 CAUSAS_POSIBLES = [
@@ -25,39 +26,55 @@ CAUSAS_POSIBLES = [
     "Algo que pasó en casa", "No estoy seguro/a", "Otro motivo"
 ]
 
-# Nombre del archivo donde guardaremos todas las respuestas.
-NOMBRE_ARCHIVO_EXCEL = 'diario_emocional_escolar.xlsx'
+# --- CONFIGURACIÓN DE GOOGLE SHEETS ---
+# Define el nombre de tu archivo de credenciales JSON
+RUTA_CREDENCIALES = 'credentials.json'
+# Define el nombre de tu hoja de cálculo en Google Sheets
+NOMBRE_HOJA_CALCULO = 'Diario Emocional - Registros'
 
-def guardar_en_excel(nuevos_datos):
+def guardar_en_google_sheets(nuevos_datos):
     """
     Esta función recibe los datos recogidos del usuario y los guarda
-    en un archivo de Excel. Si el archivo ya existe, añade los datos
-    nuevos al final, sin borrar los anteriores.
+    en la Hoja de Google especificada.
     """
     try:
-        # Creamos un DataFrame con los nuevos datos.
-        df_nuevos = pd.DataFrame([nuevos_datos])
+        # Define los alcances de la API (permisos que necesita la cuenta de servicio)
+        scope = [
+            'https://spreadsheets.google.com/feeds',
+            'https://www.googleapis.com/auth/drive'
+        ]
 
-        if os.path.exists(NOMBRE_ARCHIVO_EXCEL):
-            # Leemos el archivo existente
-            df_existente = pd.read_excel(NOMBRE_ARCHIVO_EXCEL)
-            # Unimos el dataframe existente con el nuevo
-            df_final = pd.concat([df_existente, df_nuevos], ignore_index=True)
-        else:
-            # Si el archivo no existe, el nuevo dataframe es el final
-            df_final = df_nuevos
+        # Carga las credenciales desde el archivo JSON
+        # La ruta del archivo de credenciales debe ser correcta
+        creds = ServiceAccountCredentials.from_json_keyfile_name(RUTA_CREDENCIALES, scope)
+        
+        # Autoriza el cliente de gspread
+        client = gspread.authorize(creds)
 
-        # Reordenamos las columnas para que siempre tengan el mismo orden
-        columnas_ordenadas = ['Curso', 'Materia', 'Sentimiento', 'Causa', 'Explicacion Adicional']
-        df_final = df_final[columnas_ordenadas]
+        # Abre la hoja de cálculo por su nombre
+        # Asegúrate de que el nombre de la hoja de cálculo coincida exactamente
+        sheet = client.open(NOMBRE_HOJA_CALCULO).sheet1 # .sheet1 selecciona la primera hoja dentro del documento
 
-        # Guardamos el dataframe final en el archivo Excel
-        df_final.to_excel(NOMBRE_ARCHIVO_EXCEL, index=False)
-        print(f"✅ Registro guardado correctamente en {NOMBRE_ARCHIVO_EXCEL}") # Log para confirmar
+        # Prepara los datos como una lista en el orden de tus columnas
+        # Es crucial que el orden aquí coincida con los encabezados en tu Google Sheet
+        fila_a_insertar = [
+            nuevos_datos.get('Curso'),
+            nuevos_datos.get('Materia'),
+            nuevos_datos.get('Sentimiento'),
+            nuevos_datos.get('Causa'),
+            nuevos_datos.get('Explicacion Adicional')
+        ]
+
+        # Añade la nueva fila al final de la hoja
+        sheet.append_row(fila_a_insertar)
+        
+        print(f"✅ Registro guardado correctamente en Google Sheets: {NOMBRE_HOJA_CALCULO}")
         return True
 
     except Exception as e:
-        print(f"❌ Ha ocurrido un error al guardar en Excel: {e}")
+        print(f"❌ Ha ocurrido un error al guardar en Google Sheets: {e}")
+        # Puedes añadir más detalles del error si es necesario para depuración
+        # Por ejemplo: print(traceback.format_exc())
         return False
 
 # --- RUTAS DE LA API ---
@@ -99,11 +116,11 @@ def submit_entry():
         'Explicacion Adicional': data.get('explicacion', '')
     }
 
-    # Guardamos en el archivo Excel
-    if guardar_en_excel(datos_recogidos):
-        return jsonify({"success": True, "message": "¡Registro guardado con éxito!"})
+    # Guardamos en la Hoja de Google
+    if guardar_en_google_sheets(datos_recogidos):
+        return jsonify({"success": True, "message": "¡Registro guardado con éxito en Google Sheets!"})
     else:
-        return jsonify({"success": False, "message": "Error al guardar el registro."}), 500
+        return jsonify({"success": False, "message": "Error al guardar el registro en Google Sheets."}), 500
 
 # --- INICIAR EL SERVIDOR ---
 if __name__ == '__main__':
@@ -114,3 +131,4 @@ if __name__ == '__main__':
     # NOTA: Si haces cambios en este archivo (backend.py), tendrás que detener 
     # el servidor (Ctrl+C) y volver a iniciarlo manualmente para ver los cambios.
     app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+
